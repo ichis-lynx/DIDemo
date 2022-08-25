@@ -19,16 +19,22 @@ object DependencyInjector {
 //    }
 
     private lateinit var applicationContext: () -> Context
+    private lateinit var contextProvider: ContextProvider
+
+    interface ContextProvider {
+        fun provideContext(): Context
+    }
 
     fun initApplicationContext(provideContext: () -> Context) {
         applicationContext = provideContext
     }
 
-    private fun provideMovieRoomDatabase() = MovieRoomDb(applicationContext())
+    fun initApplicationContext(contextProvider: ContextProvider) {
+        this.contextProvider = contextProvider
+    }
 
-    private fun provideMovieDao(): MovieDao = provideMovieRoomDatabase().getMovieDao()
 
-    fun provideLocalMovieDataSource(): LocalMovieDataSource = RoomMovieDataSource(provideMovieDao())
+    fun provideLocalMovieDataSource(): LocalMovieDataSource = RoomMovieDataSource(RoomModule.provideMovieDao())
 
     fun provideRemoteMovieDataSource(): RemoteMovieDataSource = FirestoreMovieDataSource()
 
